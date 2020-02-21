@@ -1,0 +1,14 @@
+image: node:latest
+pipelines:
+    branches:
+         develop:
+                   - step:
+                            caches:
+                                - node
+                            script:
+                                - apt-get update && apt-get install -y rsync
+                                - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+                                - cd $BITBUCKET_CLONE_DIR
+                                - rsync -r -v -e ssh . $SSH_USER_NAME@$SERVER_IP:/var/www/altius-api --delete-before --exclude '.git'
+                                - ssh $SSH_USER_NAME@$SERVER_IP 'cd /var/www/altius-api && npm install'
+                                - ssh $SSH_USER_NAME@$SERVER_IP 'pm2 restart all'
